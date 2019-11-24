@@ -1,23 +1,31 @@
 import { Router, Request, Response } from "express";
+import { EncuestaData } from '../clases/encuesta';
+import Server from '../clases/server';
 
 const router = Router();
 
+// Creamos una instancia de la encuesta grafica
+
+const encuestaGrafica = new EncuestaData();
+
 router.get("/encuesta", (req: Request, resp: Response) => {
-  resp.json({
-    ok: true,
-    mensaje: "Probando encuestas"
-  });
+  resp.json(encuestaGrafica.getDataGrafica());
 });
 
-// router.post("/mensajes", (req: Request, resp: Response) => {
-//   const cuerpo = req.body.cuerpo;
-//   const de = req.body.de;
+router.post("/encuesta", (req: Request, resp: Response) => {
 
-//   resp.json({
-//     ok: true,
-//     cuerpo,
-//     de
-//   });
-// });
+  const pregunta = req.body.pregunta;
+  const valor = Number(req.body.valor);
+
+  encuestaGrafica.incrementarValor(pregunta, valor);
+
+  const server = Server.instance;
+
+  server.io.emit('cambios-encuesta', encuestaGrafica.getDataGrafica());
+
+  resp.json(encuestaGrafica.getDataGrafica());
+
+
+});
 
 export default router;
